@@ -78,6 +78,8 @@
 # start_emeter_cal
 # get_emeter_realtime
 
+# modified by curesec gmbh, we added some commands, everything else, like the header obove, remains unchanged.
+
 
 import socket
 import json
@@ -115,23 +117,27 @@ def encode(a):
     return b
 
 def reset_cmd():
-	#delay in seconds
+	#reset plug with delay in seconds, added by curesec
     command["system"] = {"reset": {"delay":1}}
 
 def reboot_cmd():
+    #reboot device with delay in seconds, added by curesec
     command["system"] = {"reboot":{"delay":1}}
 
-def download_FW_cmd():
-    command["system"] = {"download_firmware":"URL"}
-
 def unbind_cmd():
+    #unbind plug from any account, added by curesec
     unbind = {"unbind":None}
     command["cnCloud"] = unbind
 
 def bind_cmd():
+    #bind plug to your account if not already added to another one, if so use unbind first, added by curesec
     bind = {"bind":{"username":"yourUsername", "password":"yourPassword"}}
     command["cnCloud"] = bind
     return False
+
+def emeter_cmd():
+    #current energy consumption, added by curesec
+    command["emeter"] = {"get_realtime":null}
 
 def on_cmd():
     relay_state = {"set_relay_state": {"state": 1}}
@@ -143,7 +149,6 @@ def off_cmd():
     relay_state = {"set_relay_state": {"state": 0}}
     command["system"] = relay_state
     return False
-
 
 def led_on_cmd():
     led = {"set_led_off": {"off": 0}}
@@ -176,13 +181,13 @@ def state_cmd():
     return True
 
 
-description="Control TP-LINK HS100 WiFi Smart Plug"
+description="Control TP-LINK HS100/HS110 WiFi Smart Plug"
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument('-d', '--debug', help="Print additional debug output",
                     action="store_true")
 parser.add_argument('-H', '--host', required=True, action="store",
                     help="Address of the smart plug")
-parser.add_argument('-a', '--alias', action="store", default="hs100",
+parser.add_argument('-a', '--alias', action="store", default="hs110",
                     help="Device Alias")
 parser.add_argument(
     "command",
@@ -197,9 +202,9 @@ parser.add_argument(
         'info',
 	    'bind',
         'unbind',
-        'download_FW',
         'reset',
-        'reboot',])
+        'reboot',
+        'emeter'])
 args = parser.parse_args()
 
 func = getattr(__import__('__main__'), args.command + "_cmd", None)
